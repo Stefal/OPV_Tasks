@@ -5,6 +5,7 @@ import logging
 
 from .task import Task
 from opv_api_client import ressources
+from opv_tasks.third_party.reconstructionUtils import ReconstructionUtils
 
 from path import Path
 
@@ -100,8 +101,9 @@ class OpensfmTask(Task):
                 #get data for just our panorama
                 panorama_data =  output_opensfm_json["shots"][str(panorama.id_panorama)+".jpg"]
 
-                #put gps cord and translation cord in output data
-                self.output_data[panorama.id_panorama] = (sensors.gps_pos["coordinates"], panorama_data["translation"])
+                data = ReconstructionUtils().opticalCenter(panorama_data)
+
+                self.output_data[panorama.id_panorama] = (sensors.gps_pos["coordinates"], data)
 
             #else we will use geolocalisation to generate path
             except KeyError:
@@ -192,9 +194,7 @@ class OpensfmTask(Task):
             lot = near_panorama[0].cp.lot
             lot_to = near_panorama[1].cp.lot
 
-            yaw = math.degrees(math.atan2(diff_cord[0], diff_cord[1]))
-            yaw += 180+45
-            yaw += lot_to.sensors.degrees
+            yaw = math.degrees(math.atan2(diff_cord[0], diff_cord[1])) + 180
 
             while yaw < 0:
                 yaw += 360
