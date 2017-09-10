@@ -19,6 +19,30 @@
 import numpy as np
 
 class ReconstructionUtils:
+
+    def projectOnVector(self, originalVector, projToVector):
+        """
+        Project originalVector to projToVector.
+
+        :param originalVector: Vector that will on projected.
+        :param projToVector: originalVector is projected on this vector.
+        :return: resulted vector from the projection.
+        """
+        projToVector = self.normalize(projToVector)
+        dot = np.vdot(originalVector, projToVector)
+        return np.multiply(projToVector, dot)
+
+    def projectOnPlane(self, originalVector, planeNormal):
+        """
+        Project on a plane using it's normal.
+
+        :param originalVector: Vector to be projected.
+        :param planeNormal: Plane normal.
+        :return: originalVector projected on the plane defined by it's normal.
+        """
+        normalComponents = self.projectOnVector(originalVector, planeNormal)
+        return np.subtract(originalVector, normalComponents)
+
     def normalize(self, v):
         """
         Noramlize a vector.
