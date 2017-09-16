@@ -19,6 +19,31 @@
 import numpy as np
 
 class ReconstructionUtils:
+    """
+    Utils fonctions for openSFM computation.
+    """
+
+    def math_clamp(self, x, a, b):
+        """
+        a if x < a else(b if x > b else x)
+        :param x: numeric value
+        :param a: numeric value
+        :param b: numeric value
+        :return: a if x < a else(b if x > b else x)
+        """
+        return a if x < a else(b if x > b else x)
+
+    def angleTo(self, vectA, vectB):
+        """
+        Return angle between 2 vectors. Equivalent to Three.JS.Vect3.angleTo
+
+        :param vectA: First vector.
+        :param vectB: Second vector.
+        :return: Angle between vectA and vectB in radian.
+        """
+        theta = np.vdot(vectA, vectB) / (np.linalg.norm(vectA) * np.linalg.norm(vectB))
+        print("theta {}".format(theta))
+        return np.arccos(self.math_clamp(theta, -1, 1))
 
     def projectOnVector(self, originalVector, projToVector):
         """
