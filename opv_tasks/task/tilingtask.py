@@ -84,12 +84,11 @@ class TilingTask(Task):
             self.logger.debug(self.pano.cp.lot)
             lot = self.pano.cp.lot
 
-            lot.tile = self.tile.id
+            lot.tile = self.tile
             lot.save()
 
     def runWithExceptions(self, options={}):
         """Run the tilling task my faverite one."""
-
         self.checkArgs(options)
         self.pano = self._client_requestor.make(ressources.Panorama, options["id_panorama"], options["id_malette"])
         with self._opv_directory_manager.Open(self.pano.equirectangular_path) as (_, pano_dirpath):
