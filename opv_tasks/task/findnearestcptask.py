@@ -126,13 +126,13 @@ class FindnearestcpTask(Task):
         lots_ids = [lot.id_lot + i for i in range(-max_id_number, max_id_number) if lot.id_lot + i >= 0 and i != 0]
         for id_lot in lots_ids:
             try:
-                l = self._client_requestor.make(ressources.Lot, lot.id_malette, id_lot)
-                if lot.id.id_campaign == l.id.id_campaign:  # check it a lot from the same campaign
-                    resulted_cps += lot.cps
+                l = self._client_requestor.make(ressources.Lot, id_lot, lot.id_malette)
+                if lot.campaign.id_campaign == l.campaign.id_campaign:  # check it a lot from the same campaign
+                    resulted_cps += l.cps
+                    self.logger.debug(resulted_cps)
             except RequestAPIException:
                 # lot doesn't exists
                 pass
-
         return resulted_cps
 
     def runWithExceptions(self, options={}):
@@ -159,6 +159,9 @@ class FindnearestcpTask(Task):
             self.logger.debug("Using nearest by id_lot")
             cps = self.searchNearestByLotId(lot=lot)
 
+            for cp in cps:
+                print("id_cp: " + str(cp.id_cp) + " cp.stichable: " + str(cp.stichable))
+
             # filtering cps, to keep stitchable ones
             cps = [cp for cp in cps if cp.stichable]
             self.logger.debug(cps)
@@ -182,4 +185,4 @@ class FindNearestCpNoCpFoundException(TaskException):
         self.lot = lot
 
     def getErrorMessage(self):
-        return "No nearest CP (stitchable) found for lot id_lot:{} id_malette: {}".format(str(self.lot.id.id_cp), str(self.lot.id.id_malette))
+        return "No nearest CP (stitchable) found for lot id_lot:{} id_malette: {}".format(str(self.lot.id_lot), str(self.lot.id_malette))
