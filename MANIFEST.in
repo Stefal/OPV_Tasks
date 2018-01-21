@@ -1,1 +1,2 @@
 recursive-include opv_tasks/ressources *.pto
+recursive-include opv_tasks/ressources *.html
