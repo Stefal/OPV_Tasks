@@ -14,7 +14,7 @@
 
 # Contributors: Benjamin BERNARD <benjamin.bernard@openpathview.fr>
 # Email: team@openpathview.fr
-# Description: Manage picture rotation in portrait mode
+# Description: Generate the camapaign pannellum config and copy config asset.
 
 from opv_tasks.task import Task
 from opv_api_client import ressources
@@ -122,7 +122,7 @@ class WebgenTask(Task):
         self.html_file.copyfile(self.web_path / "index.html")
         self.html_file = self.web_path / "index.html"
 
-        self.logger.info(self.web_path)
+        self.logger.info("The web directory is store here : "+self.web_path)
 
         self.logger.info("Put asset in the web directory")
         for lot in self.usable_lot:
