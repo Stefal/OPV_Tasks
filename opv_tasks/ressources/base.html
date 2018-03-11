@@ -1,35 +1,156 @@
 <!DOCTYPE HTML>
 <html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Open path view</title>
-<link rel="stylesheet" href="pannellum/pannellum.css"/>
-<script type="text/javascript" src="pannellum/pannellum.js"></script>
-<style>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open path view</title>
 
+    <link rel="stylesheet" href="lib/pannellum/pannellum.css">
+    <script src="lib/pannellum/pannellum.js"></script>
 
-html, body{
-margin:0px;
-padding:0px;
-width: 100%;
-height: 100%;
-}
-#panorama {
-margin:0px;
-padding:0px;
-width: 100%;
-height: 100%;
-}
-</style>
-</head>
-<body>
+    <link rel="stylesheet" href="lib/leaflet/leaflet.css" />
+    <script src="lib/leaflet/leaflet.js"></script>
 
-<div id="panorama"></div>
-<script>
-var json_file = JSON.parse('JSON_DATA');
-pannellum.viewer('panorama',json_file);
-</script>
+    <script src="lib/jquery/jquery.js"></script>
 
-</body>
+    <style>
+    html, body{
+      margin:0px;
+      padding:0px;
+      width: 100%;
+      height: 100%;
+      display: flex;
+    }
+
+    #panorama{
+      margin:0px;
+      padding:0px;
+      width: 75%;
+      height: 100%;
+    }
+
+    #map{
+      margin:0px;
+      padding:0px;
+      width: calc(25% - 5px);
+      height: 100%;
+    }
+
+    #dragbar{
+      margin:0px;
+      padding:0px;
+      width: 5px;
+      height: 100%;
+      background-color: black;
+      cursor: col-resize;
+    }
+    </style>
+  </head>
+  <body>
+    <div id="panorama"></div>
+    <div id="dragbar"></div>
+    <div id="map"></div>
+
+    <script>
+      //Init pannellum and parse config
+      var config = JSON.parse('JSON_DATA');
+      var viewer = pannellum.viewer('panorama', config);
+      viewer.startAutoRotate();
+
+      //Init leaflet map with osm data
+      map = new L.Map('map');
+
+      //Create the tile layer with correct attribution
+      var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+      var osmAttrib='Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
+      var osm = new L.TileLayer(osmUrl, {minZoom: 8, maxZoom: 19, attribution: osmAttrib});
+
+      //Start the map in Brest
+      map.setView(new L.LatLng(48.390834, -4.485556), 14);
+      map.addLayer(osm);
+
+      //Draw the polyline who represent the parcourt
+      scenes = config.scenes;
+      scenes_pos = [];
+
+      for (var scene in scenes){
+        scene = scenes[scene];
+        hot = scene.hotSpots;
+        for(var i= 0; i < hot.length; i++){
+             i = hot[i];
+             var anOtherScene = scenes[i.sceneId];
+             var anArray = [[scene.gps[0],scene.gps[1]],[anOtherScene.gps[0],anOtherScene.gps[1]]];
+             scenes_pos.push(anArray)
+        }
+      }
+
+      var polyline = L.polyline(scenes_pos, {color: 'red'}).addTo(map);
+      map.fitBounds(polyline.getBounds());
+
+      //Convert degrees in radian
+      function convertRad(input){
+        return (Math.PI * input)/180;
+      }
+
+      function calcDistance(pointA, pointB){
+        R = 6378000;
+        pointA = [convertRad(pointA[0]), convertRad(pointA[1])];
+        pointB = [convertRad(pointB[0]), convertRad(pointB[1])];
+
+        d = R * (Math.PI/2 - Math.asin( Math.sin(pointB[0]) * Math.sin(pointA[0]) + Math.cos(pointB[1] - pointA[1]) * Math.cos(pointB[0]) * Math.cos(pointA[0])));
+        return d;
+      }
+
+      //Click to load scene in pannellum
+      function onMapClick(e) {
+        var point = [e.latlng.lat, e.latlng.lng];
+        var minDist = new Object();
+        for (var scene in scenes){
+          scene = scenes[scene];
+          dist = calcDistance(point, scene.gps);
+          if (minDist.value == undefined){
+            minDist.scene = scene.title;
+            minDist.value = dist;
+          }else{
+            if (dist < minDist.value){
+              minDist.scene = scene.title;
+              minDist.value = dist;
+            }
+          }
+        }
+        viewer.loadScene(minDist.scene, 0, 0, viewer.getHfov());
+        viewer.startAutoRotate();
+      }
+
+      map.on('click', onMapClick);
+
+      //Drag bar
+      var dragging = false;
+      var dragbar = $('#dragbar');
+      var pano = $('#panorama');
+      var mapO = $('#map');
+
+      dragbar.mousedown(function(e){
+         dragging = true;
+      });
+
+      $(document).mousemove(function(e){
+        if (dragging == true){
+          var cursor = e.pageX;
+          var totalSize = window.innerWidth;
+          var newPanoSize = 100*cursor/totalSize;
+          var newMapSize = 100 - newPanoSize;
+          pano.css("width", newPanoSize+"%");
+          mapO.css("width", newMapSize+"%");
+        }
+      });
+
+      $(document).mouseup(function(e){
+        if (dragging == true){
+          viewer.resize();
+          dragging = false;
+        }
+      });
+    </script>
+  </body>
 </html>
