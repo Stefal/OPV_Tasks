@@ -84,6 +84,11 @@
         }
       }
 
+      var currentScene = viewer.getScene()
+      currentScene = scenes[currentScene]
+      var currentPos = L.marker([currentScene.gps[0], currentScene.gps[1]]);
+      currentPos.addTo(map);
+
       var polyline = L.polyline(scenes_pos, {color: 'red'}).addTo(map);
       map.fitBounds(polyline.getBounds());
 
@@ -118,10 +123,18 @@
             }
           }
         }
-        viewer.loadScene(minDist.scene, 0, 0, viewer.getHfov());
-        viewer.startAutoRotate();
+        if (minDist.value < 10){
+          viewer.loadScene(minDist.scene, 0, 0, viewer.getHfov());
+          viewer.startAutoRotate();
+        }
       }
 
+      function changeMarker(e) {
+        var currentScene = viewer.getScene()
+        currentScene = scenes[currentScene]
+        currentPos.setLatLng([currentScene.gps[0], currentScene.gps[1]])
+      }
+      viewer.on('load', changeMarker);
       map.on('click', onMapClick);
 
       //Drag bar
