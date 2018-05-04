@@ -28,6 +28,10 @@ import shutil
 class WebgenTask(Task):
     """
         Generate the camapaign pannellum config and copy config asset.
+        Input format :
+            opv-task webgen '{"id_campaign": ID_CAMPAIGN, "id_malette": ID_MALETTE }'
+        Output format :
+            WEB_PATH
     """
     TASK_NAME = "webgen"
     requiredArgsKeys = ["id_campaign", "id_malette"]
@@ -70,6 +74,8 @@ class WebgenTask(Task):
 
             scenes[lot_name] = {}
             scenes[lot_name]["title"] = lot_name
+            sensors = self._client_requestor.make(ressources.Sensors, lot.sensors.id_sensors, lot.sensors.id_malette)
+            scenes[lot_name]["gps"] = sensors.gps_pos["coordinates"]
             scenes[lot_name]["type"] = "multires"
             scenes[lot_name]["multiRes"] = {}
             scenes[lot_name]["multiRes"]["extension"] = lot.tile.extension
@@ -119,8 +125,8 @@ class WebgenTask(Task):
         self.poc_path = self.web_path / "poc"
         self.poc_path.mkdir_p()
         self.html_file = Path(os.path.split(__file__)[0]) / self.BASE_TEMPLATE_REL_PATH
-        self.html_file.copyfile(self.web_path / "index.html")
-        self.html_file = self.web_path / "index.html"
+        self.html_file.copyfile(self.web_path / "{}.html".format(self.campaign.name))
+        self.html_file = self.web_path / "{}.html".format(self.campaign.name)
 
         self.logger.info("The web directory is store here : "+self.web_path)
 
@@ -149,3 +155,4 @@ class WebgenTask(Task):
         self.createDir()
         self.generateConf()
         self.logger.info("Done ! You can find you website here "+self.web_path+" but be careful you must add the pannellum lib !")
+        return self.web_path

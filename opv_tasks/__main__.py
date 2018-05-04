@@ -15,8 +15,8 @@ Usage:
 
 Options:
     -h --help                Show help.
-    --db-rest=<str>          API rest server [default: http://localhost:5000]
-    --dir-manager=<str>      API for directory manager [default: http://localhost:5005]
+    --db-rest=<str>          API rest server [default: http://opv_master:5000]
+    --dir-manager=<str>      API for directory manager [default: http://opv_master:5005]
     --debug                  Debug mode.
 
 Sub commands/tasks are :
