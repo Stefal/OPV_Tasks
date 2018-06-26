@@ -17,10 +17,10 @@
 # Description: Task to get the nearest stitchable cp
 
 from opv_tasks.task import Task
+from opv_tasks.task import TaskException
 from opv_api_client import ressources, Filter
 from math import sin, cos, sqrt, atan2, radians
-from collections import OrderedDict
-import requests
+from opv_api_client.exceptions import RequestAPIException
 
 class FindnearestcpTask(Task):
     """
@@ -37,6 +37,13 @@ class FindnearestcpTask(Task):
     EARTH_RADIUS = 6373.0
 
     def distance(self, gpsPosA, gpsPosB):
+        """
+        Compute distance in meters beween 2 gps position.
+
+        :param gpsPosA: First GPS position {"coordinates": [LAT, LON]}
+        :param gpsPosB: Second GPS position {"coordinates": [LAT, LON]}
+        :return: Distance in meters.
+        """
         # approximate radius of earth in km
         lat1 = radians(gpsPosA['coordinates'][0])
         lon1 = radians(gpsPosA['coordinates'][1])
@@ -52,6 +59,82 @@ class FindnearestcpTask(Task):
         distance = self.EARTH_RADIUS * c
         return distance
 
+    def getStitchableCps(self, lot):
+        """
+        get stitchable CP of a lot if it as some, or empty list.
+
+        :param lot: a lot.
+        :return: a list of stitchable CPs
+        """
+        return [cp for cp in lot.cps if cp.stichable]
+
+    def searchNearestLocatedCp(self, lot, max_distance=30):  # TODO test
+        """
+        Search nearest stitchable cps.
+
+        :param lot: cp will be near this lot.
+        :param max_distance: maximum distance with the search sensor.
+        :return: A list of nearest CPs, migth be empty, cp migth no be stitchable.
+        """
+        nearest_cps = []
+        nearestSensors = self._client_requestor.make_all(ressources.Sensors,
+                                                         filters=(Filter.within([lot.sensors.id_sensors,
+                                                                  lot.sensors.id_malette], 30)))
+        self.logger.debug(nearestSensors)
+        nearestSensorsWithDistance = []
+
+        # computing distances, with tuple (dist, sensor)
+        for s in nearestSensors:
+            self.logger.debug(s)
+            nearestSensorsWithDistance.append((self.distance(s.gps_pos, lot.sensors.gps_pos), s))
+
+        # sorting it
+        nearestSensorsWithDistance = sorted(nearestSensorsWithDistance, key=lambda sensorTuple: sensorTuple[0])
+        self.logger.debug(str(nearestSensorsWithDistance))
+
+        # filtering it
+        # remove itself
+        self.logger.debug(len(nearestSensorsWithDistance))
+        nearestSensorsWithDistanceFiltered = []
+        self.logger.debug("-- Filtering --")
+        for sensorWithDistance in nearestSensorsWithDistance:
+            s = sensorWithDistance[1]
+            if not(s.lot.id_lot == lot.id_lot and s.lot.id_malette == lot.id_malette):
+                nearestSensorsWithDistanceFiltered.append(sensorWithDistance)
+
+        self.logger.debug(nearestSensorsWithDistanceFiltered)
+        self.logger.debug(len(nearestSensorsWithDistanceFiltered))
+
+        # finding nearest stitchable
+        for sensorDist in nearestSensorsWithDistanceFiltered:
+            _, sensor = sensorDist
+            associatedLot = sensor.lot
+            cps = self.getStitchableCps(associatedLot)
+            nearest_cps += cps
+
+        return nearest_cps
+
+    def searchNearestByLotId(self, lot, max_id_number=10):  # TODO test
+        """
+        Search 'nearest' stitchable cps, thoses associated whith id_lot between : lot.id_lot - max_id_number / lot.id_lot + max_id_number
+
+        :param lot: cp will be near this lot.
+        :param max_id_number: id_lot between : lot.id_lot - max_id_number / lot.id_lot + max_id_number
+        :return: A list of 'nearest' CPs, migth be empty, cp migth no be stitchable.
+        """
+        resulted_cps = []
+        lots_ids = [lot.id_lot + i for i in range(-max_id_number, max_id_number) if lot.id_lot + i >= 0 and i != 0]
+        for id_lot in lots_ids:
+            try:
+                l = self._client_requestor.make(ressources.Lot, id_lot, lot.id_malette)
+                if lot.campaign.id_campaign == l.campaign.id_campaign:  # check it a lot from the same campaign
+                    resulted_cps += l.cps
+                    self.logger.debug(resulted_cps)
+            except RequestAPIException:
+                # lot doesn't exists
+                pass
+        return resulted_cps
+
     def runWithExceptions(self, options={}):
         """
         Search nearest cp stitchable to inject it.
@@ -62,46 +145,44 @@ class FindnearestcpTask(Task):
         self.logger.debug("Options : " + str(options))
         self.checkArgs(options)
         lot = self._client_requestor.make(ressources.Lot, options["id_lot"], options["id_malette"])
-        lot.sensors.get()
-        url = self._client_requestor._makeUrl("v1", "sensors", OrderedDict((("id_lot", options["id_lot"]), ("id_malette", options["id_malette"])))) + "/within/" + str(10000)
-        rep = requests.get(url)
-        nearestSensors = rep.json()['objects']
-        self.logger.debug(nearestSensors)
-        #nearestSensors = self._client_requestor.make_all(ressources.Sensors, filters=(Filter.within([lot.sensors.id_sensors, lot.sensors.id_malette], 30)))
 
-        nearestSensorsWithDistance = []
+        # get nearest geolocated lots
+        self.logger.debug("Searching nearest lot by geoloc :")
+        cps = self.searchNearestLocatedCp(lot=lot)
 
-        # computing distances, with tuple (dist, sensor)
-        for s in nearestSensors:
-            self.logger.debug(s)
-            nearestSensorsWithDistance.append((self.distance(s['gps_pos'], lot.sensors.gps_pos), s))
+        # filtering cps, to keep stitchable ones
+        cps = [cp for cp in cps if cp.stichable]
+        self.logger.debug(cps)
 
-        # sorting it
-        nearestSensorsWithDistance = sorted(nearestSensorsWithDistance, key=lambda sensorTuple: sensorTuple[0])
-        self.logger.debug(str(nearestSensorsWithDistance))
+        # no cps found by geolocation, getting nearest ones by lot id (clearly on approximate method)
+        if len(cps) == 0:
+            self.logger.debug("Using nearest by id_lot")
+            cps = self.searchNearestByLotId(lot=lot)
 
-        # filtering it
-        # remove it self
-        self.logger.debug(len(nearestSensorsWithDistance))
-        nearestSensorsWithDistanceFiltered = []
-        self.logger.debug("-- Filtering --")
-        for sensorWithDistance in nearestSensorsWithDistance:
-            s = sensorWithDistance[1]
-            if not(s['lot'][0]['id_lot'] == lot.id_lot and s['lot'][0]['id_malette'] == lot.id_malette):
-                nearestSensorsWithDistanceFiltered.append(sensorWithDistance)
+            for cp in cps:
+                print("id_cp: " + str(cp.id_cp) + " cp.stichable: " + str(cp.stichable))
 
-        self.logger.debug(nearestSensorsWithDistanceFiltered)
-        self.logger.debug(len(nearestSensorsWithDistanceFiltered))
+            # filtering cps, to keep stitchable ones
+            cps = [cp for cp in cps if cp.stichable]
+            self.logger.debug(cps)
 
-        # finding nearest stitchable
-        for sensorDist in nearestSensorsWithDistanceFiltered:
-            _, sensor = sensorDist
-            associatedLot = self._client_requestor.make(ressources.Lot, sensor['lot'][0]["id_lot"], sensor['lot'][0]["id_malette"])
-            if associatedLot.tile["id_tile"] is not None and associatedLot.tile["id_malette"] is not None:
-                self.logger.debug("Found CP " + str(associatedLot.cps[0]))
-                out = {}
-                out['id_cp'] = associatedLot.cps[0].id_cp
-                out['id_malette'] = associatedLot.cps[0].id_malette
-                return out
+        # returning the first result
+        if len(cps) > 0:
+            self.logger.debug("Found CP " + str(cps[0]))
+            out = {}
+            out['id_cp'] = cps[0].id_cp
+            out['id_malette'] = cps[0].id_malette
+            return out
 
-        return None
+        raise FindNearestCpNoCpFoundException(lot)
+
+class FindNearestCpNoCpFoundException(TaskException):
+    """
+    Raised when no CP where found.
+    """
+
+    def __init__(self, lot):
+        self.lot = lot
+
+    def getErrorMessage(self):
+        return "No nearest CP (stitchable) found for lot id_lot:{} id_malette: {}".format(str(self.lot.id_lot), str(self.lot.id_malette))
