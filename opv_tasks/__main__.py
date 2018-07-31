@@ -5,7 +5,7 @@ from .utils import find_task, generateHelp
 from opv_directorymanagerclient import DirectoryManagerClient, Protocol
 from opv_api_client import RestClient
 
-tasks = ["makeall", "rotate", "cpfind", "autooptimiser", "stitchable", "stitch", "photosphere", "tiling", "injectcpapn", "findnearestcp", "webgen"]
+tasks = ["makeall", "rotate", "cpfind", "autooptimiser", "stitchable", "stitch", "photosphere", "tiling", "injectcpapn", "findnearestcp", "webgen", "pathfinder"]
 
 __doc__ = """ Task executor, will execute some task with input datas.
 
