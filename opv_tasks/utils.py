@@ -18,7 +18,7 @@
 
 import sys
 import subprocess
-import logging
+
 
 def run_cli(cmd, args=[], stdout=sys.stdout, stderr=subprocess.STDOUT):
     """
@@ -36,6 +36,19 @@ def run_cli(cmd, args=[], stdout=sys.stdout, stderr=subprocess.STDOUT):
     return ret.returncode
 
 
+def runTask(dm_c, db_c, task_name, inputData):
+    """
+    Run task.
+    Return a TaskReturn.
+    """
+    Task = find_task(task_name)
+    if not Task:
+        raise Exception('Task %s not found' % task_name)
+
+    task = Task(client_requestor=db_c, opv_directorymanager_client=dm_c)
+    return task.run(options=inputData)
+
+
 def find_task(taskName):
     """Find the task with taskName."""
     try:
@@ -44,6 +57,7 @@ def find_task(taskName):
         return task
     except (ImportError, AttributeError) as e:
         return None  # Task not found
+
 
 def generateHelp(taskName):
     Task = find_task(taskName)

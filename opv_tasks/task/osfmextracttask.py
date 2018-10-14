@@ -25,6 +25,8 @@ depthmap_min_consistent_views: 2      # Min number of views that should reconstr
         self.osfm_images_dir = self.osfm_dir / "images"
         self.osfm_images_dir.mkdir_p()
 
+        camera_models = {}
+
         for pano in self.pano_ids:
             pano = self._client_requestor.make(ressources.Panorama, pano, self.malette_id)
 
@@ -61,11 +63,19 @@ depthmap_min_consistent_views: 2      # Min number of views that should reconstr
                 pano_exif["focal_ratio"]
             )
 
+            camera_models[pano_exif["camera"]] = {}
+            camera_models[pano_exif["camera"]]["width"] = pano_exif["width"]
+            camera_models[pano_exif["camera"]]["height"] = pano_exif["height"]
+            camera_models[pano_exif["camera"]]["projection_type"] = pano_exif["projection_type"]
+
             with open(self.osfm_exif_dir / "{}.jpg.exif".format(pano.id_panorama), "w+") as f:
                 json.dump(pano_exif, f, indent=4)
 
         with open(self.osfm_dir / "config.yaml", "w+") as conf:
             conf.write(self.DEFAULT_CONF)
+
+        with open(self.osfm_dir / "camera_models.json", "w+") as camera_models_files:
+            json.dump(camera_models, camera_models_files)
 
     def getPictureSizes(self, picPath):
         """Return (width, height) of the specified picture (picPath)."""
@@ -75,9 +85,6 @@ depthmap_min_consistent_views: 2      # Min number of views that should reconstr
         return (width, height)
 
     def runWithExceptions(self, options={}):
-        """
-            Run webgen task with exception
-        """
         self.checkArgs(options)
 
         self.pano_ids = options["ids_pano"]

@@ -17,8 +17,8 @@
 # Description: Make it all, with correction logic
 
 from opv_tasks.task import Task, TaskStatusCode
-from opv_api_client import ressources, Filter
-from opv_tasks.utils import find_task
+from opv_tasks.utils import runTask
+
 
 class MakeallTask(Task):
     """
@@ -31,18 +31,6 @@ class MakeallTask(Task):
     TASK_NAME = "makeall"
     requiredArgsKeys = ["id_cp", "id_malette"]
 
-    def runTask(self, dm_c, db_c, task_name, inputData):
-        """
-        Run task.
-        Return a TaskReturn.
-        """
-        Task = find_task(task_name)
-        if not Task:
-            raise Exception('Task %s not found' % task_name)
-
-        task = Task(client_requestor=db_c, opv_directorymanager_client=dm_c)
-        return task.run(options=inputData)
-
     def runWithExceptions(self, options={}):
         """
             :param options: {"id_lot": , "id_malette"}
@@ -54,7 +42,7 @@ class MakeallTask(Task):
         for task in tasks:
             self.logger.info("Starting task %s" % task)
 
-            lastTaskReturn = self.runTask(self._opv_directory_manager, self._client_requestor, task, inputData)
+            lastTaskReturn = runTask(self._opv_directory_manager, self._client_requestor, task, inputData)
             self.logger.debug("TaskReturn : " + lastTaskReturn.toJSON())
             inputData = lastTaskReturn.outputData
 
@@ -66,7 +54,7 @@ class MakeallTask(Task):
                     cp.get()
                     cp.lot.get()
                     self.logger.debug(cp.lot.id)
-                    lastTaskReturn = self.runTask(self._opv_directory_manager, self._client_requestor, "findnearestcp", cp.lot.id)
+                    lastTaskReturn = runTask(self._opv_directory_manager, self._client_requestor, "findnearestcp", cp.lot.id)
                     self.logger.debug(lastTaskReturn.toJSON())
                     fromCp = lastTaskReturn.outputData
 
@@ -78,15 +66,15 @@ class MakeallTask(Task):
                     injectInput["idCpTo"] = toCp
                     injectInput["apnList"] = [0]
                     self.logger.debug("injectInput: " + str(injectInput))
-                    lastTaskReturn = self.runTask(self._opv_directory_manager, self._client_requestor, "injectcpapn", injectInput)
+                    lastTaskReturn = runTask(self._opv_directory_manager, self._client_requestor, "injectcpapn", injectInput)
                     inputData = lastTaskReturn.outputData
                     self.logger.debug(lastTaskReturn.toJSON())
 
-                    lastTaskReturn = self.runTask(self._opv_directory_manager, self._client_requestor, "autooptimiser", inputData)
+                    lastTaskReturn = runTask(self._opv_directory_manager, self._client_requestor, "autooptimiser", inputData)
                     inputData = lastTaskReturn.outputData
                     self.logger.debug(lastTaskReturn.toJSON())
 
-                    lastTaskReturn = self.runTask(self._opv_directory_manager, self._client_requestor, "stitchable", inputData)
+                    lastTaskReturn = runTask(self._opv_directory_manager, self._client_requestor, "stitchable", inputData)
                     inputData = lastTaskReturn.outputData
                     self.logger.debug(lastTaskReturn.toJSON())
 

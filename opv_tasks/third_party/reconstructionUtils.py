@@ -18,6 +18,7 @@
 
 import numpy as np
 
+
 class ReconstructionUtils:
     """
     Utils fonctions for openSFM computation.
@@ -42,7 +43,6 @@ class ReconstructionUtils:
         :return: Angle between vectA and vectB in radian.
         """
         theta = np.vdot(vectA, vectB) / (np.linalg.norm(vectA) * np.linalg.norm(vectB))
-        print("theta {}".format(theta))
         return np.arccos(self.math_clamp(theta, -1, 1))
 
     def projectOnVector(self, originalVector, projToVector):
