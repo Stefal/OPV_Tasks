@@ -39,7 +39,7 @@ class OsfmsaveTask(Task):
                         )
                     )
                     north_offset = degrees(reconstructionUtils.angleTo(
-                        [0, 1],
+                        [1, 0],
                         [data["rotation"][0], data["rotation"][1]]
                     ))
                     corrected_sensors.degrees = int(north_offset)
@@ -47,10 +47,8 @@ class OsfmsaveTask(Task):
                     corrected_sensors.create()
 
                     pano = self._client_requestor.make(ressources.Panorama, pano, self.id_malette)
-                    pano["sensors_reconstructed"] = {
-                        "id_sensors": corrected_sensors.id_sensors,
-                        "id_malette": corrected_sensors.id_malette
-                    }
+                    pano.sensors_reconstructed["id_sensors"] = corrected_sensors.id_sensors
+                    pano.sensors_reconstructed["id_malette"] = corrected_sensors.id_malette
                     pano.save()
 
     def runWithExceptions(self, options={}):
