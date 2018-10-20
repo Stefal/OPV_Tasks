@@ -38,10 +38,12 @@ class OsfmsaveTask(Task):
                             self.refLla["altitude"]
                         )
                     )
+                    orientation = reconstructionUtils.cordToVector(reconstructionUtils.getImageOrientationVector(data), optical_center)
                     north_offset = degrees(reconstructionUtils.angleTo(
-                        [1, 0],
-                        [data["rotation"][0], data["rotation"][1]]
+                        [0, 1],
+                        [orientation[i] for i in range(2)]
                     ))
+
                     corrected_sensors.degrees = int(north_offset)
                     corrected_sensors.minutes = int((north_offset - int(north_offset)) * 60)
                     corrected_sensors.create()

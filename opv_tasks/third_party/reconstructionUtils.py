@@ -117,6 +117,29 @@ class ReconstructionUtils:
         r = vect.dot(matrix)
         return r
 
+    def getImageOrientationVector(self, shot):
+        """
+        Do not return north, return image orientation
+        """
+        return self.rotate(
+            [
+                -shot["translation"][0],
+                -shot["translation"][1],
+                2-shot["translation"][2]
+            ],
+            np.negative(shot["rotation"])
+        )
+
+    def cordToVector(self, a, b):
+        v = []
+        if len(a) == len(b):
+            for i in range(len(a)):
+                v.append(a[i] - b[i])
+        else:
+            raise Exception("Cord must have the same dimention")
+
+        return v
+
     def opticalCenter(self, shot):
         """
         Get the optical center (GPS corrected location optical center of the taken shot).
