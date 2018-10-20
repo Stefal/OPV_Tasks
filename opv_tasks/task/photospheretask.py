@@ -24,7 +24,6 @@ from opv_api_client import ressources
 
 from opv_tasks.const import Const
 
-from libxmp import XMPFiles, consts
 from PIL import Image
 
 import logging
@@ -61,29 +60,16 @@ class PhotosphereTask(Task):
         with Image.open(picture_path) as im:
             width, height = im.size
 
-        xmpfile = XMPFiles(file_path=picture_path, open_forupdate=True)
-        xmp = xmpfile.get_xmp()
+        self._run_cli("exiftool", [" -XMP-GPano:ProjectionType=equirectangular",  picture_path], stdout_level=logging.DEBUG, stderr_level=logging.DEBUG)
 
-        # see https://developers.google.com/streetview/spherical-metadata
-        PHOTOSPHERE_NS = "http://ns.google.com/photos/1.0/panorama/"
+        self._run_cli("exiftool", [" -XMP-GPano:CroppedAreaImageWidthPixels="+str(width),  picture_path], stdout_level=logging.DEBUG, stderr_level=logging.DEBUG)
+        self._run_cli("exiftool", [" -XMP-GPano:CroppedAreaImageHeightPixels="+str(height),  picture_path], stdout_level=logging.DEBUG, stderr_level=logging.DEBUG)
 
-        xmp.set_property(PHOTOSPHERE_NS, "GPano:ProjectionType", "equirectangular")
+        self._run_cli("exiftool", [" -XMP-GPano:CroppedAreaLeftPixels=0",  picture_path], stdout_level=logging.DEBUG, stderr_level=logging.DEBUG)
+        self._run_cli("exiftool", [" -XMP-GPano:CroppedAreaTopPixels=0",  picture_path], stdout_level=logging.DEBUG, stderr_level=logging.DEBUG)
 
-        heading_degree = self.panorama.cp.lot.sensors.degrees + self.panorama.cp.lot.sensors.minutes / 60
-        xmp.set_property_float(PHOTOSPHERE_NS, "GPano:PoseHeadingDegrees", heading_degree)
-
-        xmp.set_property_int(PHOTOSPHERE_NS, "GPano:CroppedAreaImageWidthPixels", width)
-        xmp.set_property_int(PHOTOSPHERE_NS, "GPano:CroppedAreaImageHeightPixels", height)
-
-        xmp.set_property_int(PHOTOSPHERE_NS, "GPano:CroppedAreaLeftPixels", 0)
-        xmp.set_property_int(PHOTOSPHERE_NS, "GPano:CroppedAreaTopPixels", 0)
-
-        xmp.set_property_int(PHOTOSPHERE_NS, "GPano:FullPanoWidthPixels", width)
-        xmp.set_property_int(PHOTOSPHERE_NS, "GPano:FullPanoHeightPixels", height)
-
-        xmpfile.can_put_xmp(xmp)
-        xmpfile.put_xmp(xmp)
-        xmpfile.close_file()
+        self._run_cli("exiftool", [" -XMP-GPano:FullPanoWidthPixels="+str(width),  picture_path], stdout_level=logging.DEBUG, stderr_level=logging.DEBUG)
+        self._run_cli("exiftool", [" -XMP-GPano:FullPanoHeightPixels="+str(height),  picture_path], stdout_level=logging.DEBUG, stderr_level=logging.DEBUG)
 
         lat_deg = self.to_deg(self.panorama.cp.lot.sensors.gps_pos["coordinates"][0], ["S", "N"])
         lng_deg = self.to_deg(self.panorama.cp.lot.sensors.gps_pos["coordinates"][1], ["W", "E"])

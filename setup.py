@@ -27,7 +27,8 @@ setup(
     long_description=open('README.md').read(),
     dependency_links=[
         "git+https://github.com/OpenPathView/OPV_DBRest-client.git#egg=opv_api_client-0.2",
-        "git+https://github.com/OpenPathView/DirectoryManagerClient.git#egg=opv_directorymanagerclient-0.1"
+        "git+https://github.com/OpenPathView/DirectoryManagerClient.git#egg=opv_directorymanagerclient-0.1",
+        "git+https://github.com/Valdimus/Atrevrix-Graphe.git#egg=atrevrix-graphe-0.0.1"
     ],
     install_requires=["path.py",
                       "docopt",
@@ -35,7 +36,8 @@ setup(
                       "numpy",
                       "python-xmp-toolkit",
                       "opv_api_client",
-                      "opv_directorymanagerclient"
+                      "opv_directorymanagerclient",
+                      "atrevrix-graphe"
                       ],
     # Active la prise en compte du fichier MANIFEST.in
     include_package_data=True,

@@ -30,3 +30,5 @@ from opv_tasks.task.osfmsavetask import OsfmsaveTask
 from opv_tasks.task.osfmlaunchtask import OsfmlaunchTask
 from opv_tasks.task.osfmalltask import OsfmallTask
 from opv_tasks.task.makealltask import MakeallTask
+from opv_tasks.task.pathfindertask import PathfinderTask
+from opv_tasks.task.webgentask import WebgenTask
