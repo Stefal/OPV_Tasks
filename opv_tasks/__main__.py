@@ -5,7 +5,7 @@ from .utils import find_task, generateHelp
 from opv_directorymanagerclient import DirectoryManagerClient, Protocol
 from opv_api_client import RestClient
 
-tasks = ["makeall", "rotate", "cpfind", "autooptimiser", "stitchable", "stitch", "photosphere", "tiling", "injectcpapn", "findnearestcp", "webgen", "pathfinder", "osfmextract", "osfmall", "osfmsave", "osfmlaunch"]
+tasks = ["makeall", "rotate", "cpfind", "autooptimiser", "stitchable", "stitch", "photosphere", "tiling", "injectcpapn", "findnearestcp", "webgen", "pathfinder", "osfmextract", "osfmall", "osfmsave", "osfmlaunch", "osfmcampaign"]
 
 __doc__ = """ Task executor, will execute some task with input datas.
 
@@ -15,8 +15,8 @@ Usage:
 
 Options:
     -h --help                Show help.
-    --db-rest=<str>          API rest server [default: http://localhost:5000]
-    --dir-manager=<str>      API for directory manager [default: http://localhost:5005]
+    --db-rest=<str>          API rest server [default: http://opv_master:5000]
+    --dir-manager=<str>      API for directory manager [default: http://opv_master:5005]
     --debug                  Debug mode.
 
 Sub commands/tasks are :
