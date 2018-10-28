@@ -8,7 +8,7 @@ class OsfmcampaignTask(Task):
     """
         Launch the tasks osfm on all campaign panorama 
         Input format :
-            opv-task osfmcampaign '{"id_campaign": ID_CAMPAIGN, "id_malette": ID_MALETTE, "active": ACTIVE}'
+            opv-task osfmcampaign '{"id_campaign": ID_CAMPAIGN, "id_malette": ID_MALETTE, "active": true}'
         Note that active tag is optional, if you set it to true, it will just use active panorama,
     """
     TASK_NAME = "osfmcampaign"
@@ -18,9 +18,12 @@ class OsfmcampaignTask(Task):
         self.checkArgs(options)
         
         if "active" in options and options["active"] == True:
-            panoramas = self._client_requestor.make_all(ressources.Panorama, filters=(Filter("id_campaign")==options["id_campaign"], Filter("active")==True))
+            panoramas = self._client_requestor.make_all(ressources.PanoramaSensors, filters=(
+                Filter("id_campaign")==options["id_campaign"],
+                Filter("id_campaign_malette")==options["id_malette"],
+                Filter("active")==True))
         else:
-            panoramas = self._client_requestor.make_all(ressources.Panorama, filters=(Filter("id_campaign")==options["id_campaign"]))
+            panoramas = self._client_requestor.make_all(ressources.PanoramaSensors, filters=(Filter("id_campaign")==options["id_campaign"]))
         
         ids_panorama = [panorama.id_panorama for panorama in panoramas]
 
