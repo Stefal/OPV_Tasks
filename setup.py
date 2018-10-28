@@ -33,6 +33,7 @@ setup(
     install_requires=["path.py",
                       "docopt",
                       "pillow",
+                      "numpy",
                       "python-xmp-toolkit",
                       "opv_api_client",
                       "opv_directorymanagerclient",

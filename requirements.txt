@@ -4,3 +4,4 @@ docopt==0.6.2
 -e git+https://github.com/OpenPathView/OPV_DBRest-client@stable#egg=opv_api_client
 Pillow==4.0.0
 python-xmp-toolkit==2.0.1
+numpy
