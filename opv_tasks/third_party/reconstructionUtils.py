@@ -45,6 +45,7 @@ class ReconstructionUtils:
         theta = np.vdot(vectA, vectB) / (np.linalg.norm(vectA) * np.linalg.norm(vectB))
         return np.arccos(self.math_clamp(theta, -1, 1))
 
+
     def projectOnVector(self, originalVector, projToVector):
         """
         Project originalVector to projToVector.
