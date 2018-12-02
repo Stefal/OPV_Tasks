@@ -33,3 +33,4 @@ from opv_tasks.task.makealltask import MakeallTask
 from opv_tasks.task.pathfindertask import PathfinderTask
 from opv_tasks.task.webgentask import WebgenTask
 from opv_tasks.task.osfmcampaigntask import OsfmcampaignTask
+from opv_tasks.task.exportviewertask import ExportviewerTask
