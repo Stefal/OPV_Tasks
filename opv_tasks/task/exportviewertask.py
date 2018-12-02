@@ -24,7 +24,6 @@ class ExportviewerTask(Task):
         self.virtualtour_dir.mkdir_p()
         self.panorama_dir = self.db / "panorama"
         self.panorama_dir.mkdir_p()
-        self.logger.info("Working directory : {}".format(self.path))
 
     def buildJSON(self):
         self.panorama_to_add = []
@@ -50,14 +49,15 @@ class ExportviewerTask(Task):
                     "description": path_details.decription,
                     "name": path_details.name,
                     "id_campaign": path_details.campaign.id_campaign,
-                    "id_malette": path_details.campaign.id_malette,
-                    "path_nodes": []
-                },
-                "path_edges": {}
+                    "id_campaign_malette": path_details.campaign.id_malette,
+                    "path_nodes": {},
+                    "path_edges": {}
+                }
             }
             path_nodes = self.virtualtour_paths = self._client_requestor.make_all(ressources.PathNodeExtended, filters=(
                 Filter("id_path_details")==path_details.id_path_details,
-                Filter("id_path_details_malette")==path_details.id_malette)
+                Filter("id_path_details_malette")==path_details.id_malette,
+                Filter("disabled")==False)
             )
             path_edges = self.virtualtour_paths = self._client_requestor.make_all(ressources.PathEdge, filters=(
                 Filter("id_path_details")==path_details.id_path_details,
@@ -65,7 +65,7 @@ class ExportviewerTask(Task):
             )
 
             for path_node in path_nodes:
-                virtualtour_path_dict["path_details"]["path_nodes"].append({
+                virtualtour_path_dict["path_details"]["path_nodes"]["{}-{}".format(path_node.id_malette, path_node.id_path_node)] = {
                     "id_path_node": path_node.id_path_node,
                     "id_malette": path_node.id_malette,
                     "id_panorama": path_node.id_panorama,
@@ -82,12 +82,14 @@ class ExportviewerTask(Task):
                     "reconstructed_id_malette": path_node.reconstructed_id_malette,
                     "reconstructed_gps_pos": path_node.reconstructed_gps_pos,
                     "reconstructed_minutes": path_node.reconstructed_minutes,
-                    "reconstructed_degrees": path_node.reconstructed_degrees
-                })
+                    "reconstructed_degrees": path_node.reconstructed_degrees,
+                    "edges_dest": [],
+                    "edges_source": []
+                }
                 self.panorama_to_add.append("{}-{}".format(path_node.id_panorama, path_node.id_panorama_malette))
 
             for path_edge in path_edges:
-                virtualtour_path_dict["path_edges"]["{}-{}".format(path_edge.id_malette, path_edge.id_path_edge)] = {
+                virtualtour_path_dict["path_details"]["path_edges"]["{}-{}".format(path_edge.id_malette, path_edge.id_path_edge)] = {
                     "id_path_edge": path_edge.id_path_edge,
                     "id_malette": path_edge.id_malette,
                     "source_id_path_node": path_edge.source_path_node.id_path_node,
@@ -100,9 +102,12 @@ class ExportviewerTask(Task):
                     "source_yaw_dest": path_edge.source_yaw_dest,
                 }
 
+                virtualtour_path_dict["path_details"]["path_nodes"]["{}-{}".format(path_edge.dest_path_node.id_malette, path_edge.dest_path_node.id_path_node)]["edges_dest"].append("{}-{}".format(path_edge.id_malette, path_edge.id_path_edge))
+                virtualtour_path_dict["path_details"]["path_nodes"]["{}-{}".format(path_edge.source_path_node.id_malette, path_edge.source_path_node.id_path_node)]["edges_source"].append("{}-{}".format(path_edge.id_malette, path_edge.id_path_edge))
+
             self.virtualtour_dict["virtualtour_paths"].append(virtualtour_path_dict)
         
-        with open(self.virtualtour_dir / "{}-{}.json".format(self.virtualtour.id_virtualtour, self.virtualtour.id_malette), "w") as virtualtour_file:
+        with open(self.virtualtour_dir / "{}-{}.json".format(self.virtualtour.id_malette, self.virtualtour.id_virtualtour), "w") as virtualtour_file:
             json.dump(self.virtualtour_dict, virtualtour_file)
 
     def buildPanoramaJSON(self):
@@ -157,6 +162,11 @@ class ExportviewerTask(Task):
     def storeUUID(self):
         with open(self.dm / "uuid.list", "a") as uuid_file:
             uuid_file.write("\n".join(self.uuid))
+        
+        for uuid in self.uuid:
+            with self._opv_directory_manager.Open(uuid) as (name, dir_path):
+                uuid_dir = Path(dir_path)
+                uuid_dir.copytree(self.dm / uuid)
 
     def runWithExceptions(self, options={}):
         self.checkArgs(options)
@@ -166,6 +176,8 @@ class ExportviewerTask(Task):
             self.path = Path(tempfile.mkdtemp())
 
         self.createDir()
+        self.logger.info("Working directory : {}".format(self.path))
+
         self.virtualtour = self._client_requestor.make(ressources.Virtualtour, options["id_virtualtour"], options["id_malette"])
         self.virtualtour_paths = self._client_requestor.make_all(ressources.Virtualtour_path, filters=(
             Filter("id_virtualtour")==self.virtualtour.id_virtualtour,
@@ -174,6 +186,8 @@ class ExportviewerTask(Task):
 
         self.uuid = []
 
+        self.logger.info("Building json")
         self.buildJSON()
         self.buildPanoramaJSON()
+        self.logger.info("Copying dm")
         self.storeUUID()
