@@ -17,8 +17,26 @@ class OsfmsaveTask(Task):
     TASK_NAME = "osfmsave"
     requiredArgsKeys = ["id_malette", "osfm_dir"]
 
+    def angleToNorthSigned(self, camVect):
+        """
+        Returns the angle to the north (y(0,1) vect) signed.
+        :param camVect: camera vector
+        :return: The angle to the north clock wise signed.
+        """
+        x = 0
+        y = 1
+        camVectNorm = self.reconstructionUtils.normalize(camVect)
+        northVect = [0, 1]
+
+        sin = camVectNorm[x]*northVect[y] - camVectNorm[y]*northVect[x]
+        sinSign = 1 if sin >= 0 else -1
+
+        return sinSign * self.reconstructionUtils.angleTo(
+            northVect,
+            camVect
+        )
+
     def getPanosData(self):
-        reconstructionUtils = ReconstructionUtils()
         with open(self.dir / "reconstruction.json") as reconstructions:
             self.reconstructions = json.load(reconstructions)
             for reconstruction in self.reconstructions:
@@ -27,7 +45,7 @@ class OsfmsaveTask(Task):
                     pano = int(pano.split(".")[0])
                     self.logger.info("Panorama {} had been treat by opensfm".format(pano))
                     corrected_sensors = self._client_requestor.make(ressources.Sensors)
-                    optical_center = reconstructionUtils.opticalCenter(data)
+                    optical_center = self.reconstructionUtils.opticalCenter(data)
                     corrected_sensors.gps_pos = Point(
                         coordinates=lla_from_topocentric(
                             optical_center[0],
@@ -38,11 +56,9 @@ class OsfmsaveTask(Task):
                             self.refLla["altitude"]
                         )
                     )
-                    orientation = reconstructionUtils.cordToVector(reconstructionUtils.getImageOrientationVector(data), optical_center)
-                    north_offset = degrees(reconstructionUtils.angleTo(
-                        [0, 1],
-                        [orientation[i] for i in range(2)]
-                    ))
+                    orientation = self.reconstructionUtils.cordToVector(self.reconstructionUtils.getImageOrientationVector(data), optical_center)
+                    camVect = [orientation[i] for i in range(2)]
+                    north_offset = degrees(self.angleToNorthSigned(camVect))
 
                     corrected_sensors.degrees = int(north_offset)
                     corrected_sensors.minutes = int((north_offset - int(north_offset)) * 60)
@@ -58,6 +74,7 @@ class OsfmsaveTask(Task):
             Run webgen task with exception
         """
         self.checkArgs(options)
+        self.reconstructionUtils = ReconstructionUtils()
         self.id_malette = options["id_malette"]
 
         self.dir = Path(options["osfm_dir"])
