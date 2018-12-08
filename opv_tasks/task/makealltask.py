@@ -18,6 +18,7 @@
 
 from opv_tasks.task import Task, TaskStatusCode
 from opv_tasks.utils import runTask
+from opv_api_client import ressources, Filter 
 
 
 class MakeallTask(Task):
