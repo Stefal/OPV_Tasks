@@ -81,7 +81,7 @@ class MakeallTask(Task):
 
                     continue
 
-                self.logger.error("Last task executed failled with following error : " + lastTaskReturn.error)
+                self.logger.error("Last task executed failed with following error : " + lastTaskReturn.error)
                 break
 
             self.logger.info("End of task %s" % task)

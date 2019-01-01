@@ -48,7 +48,7 @@ def main():
             logger.debug("TaskReturn : " + lastTaskReturn.toJSON())
 
             if not lastTaskReturn.isSuccess():
-                logger.error("Last task executed failled with following error : " + lastTaskReturn.error)
+                logger.error("Last task executed failed with following error : " + lastTaskReturn.error)
                 break
             inputData = lastTaskReturn.outputData
 
@@ -58,7 +58,7 @@ def main():
         logger.debug("TaskReturn : " + lastTaskReturn.toJSON())
 
         if not lastTaskReturn.isSuccess():
-            logger.error("Last task executed failled with following error : " + lastTaskReturn.error)
+            logger.error("Last task executed failed with following error : " + lastTaskReturn.error)
 
 def run(dm_c, db_c, task_name, inputData):
     """
