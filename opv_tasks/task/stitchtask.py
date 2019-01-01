@@ -91,7 +91,7 @@ class HuginExecutorException(TaskException):
         self.idCp = idCp
 
     def getErrorMessage(self):
-        return "hugin executor failled for CP " + str(self.idCp) + "with the following options : " + str(self.cli_param)
+        return "hugin executor failed for CP " + str(self.idCp) + "with the following options : " + str(self.cli_param)
 
 class InvalidNotSitchaleException(TaskException):
     """ When CP isn't stitchable. """

@@ -109,10 +109,10 @@ class CpfindTask(Task):
 
 class CpFindException(TaskException):
     """
-    Raised when cpfind cmd failled.
+    Raised when cpfind cmd failed.
     """
     def __init__(self, cliOptions):
         self.cliOptions = cliOptions
 
     def getErrorMessage(self):
-        return "cpfind failled with the following options : " + repr(copyfile)
+        return "cpfind failed with the following options : " + repr(copyfile)

@@ -92,4 +92,4 @@ class AutooptimiserException(TaskException):
         self.cli_options = cli_options
 
     def getErrorMessage(self):
-        return "autooptimiser failled with the following options : " + repr(self.cli_options)
+        return "autooptimiser failed with the following options : " + repr(self.cli_options)
