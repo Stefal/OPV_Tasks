@@ -42,7 +42,7 @@ class StitchableTask(Task):
         p.readData(ifs)
 
         cpv = p.getCtrlPoints()
-        picLinkNb = [0 for x in range(6)]
+        picLinkNb = [0 for x in range(4)]
         nbPoints = 0
 
         for cp in cpv:
