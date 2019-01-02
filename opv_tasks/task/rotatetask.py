@@ -101,4 +101,4 @@ class RotateException(TaskException):
         self.rotationAngle = rotationAngle
 
     def getErrorMessage(self):
-        return "Failled to rotate " + str(self.filePath) + ", with rotation angle : " + str(self.rotationAngle)
+        return "failed to rotate " + str(self.filePath) + ", with rotation angle : " + str(self.rotationAngle)
