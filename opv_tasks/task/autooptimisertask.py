@@ -37,7 +37,7 @@ class AutooptimiserTask(Task):
 
     TASK_NAME = "autooptimiser"
 
-    AUTOOPTIMISER_OPTIONS = ["-a", "-m", "-l", "-s"]
+    AUTOOPTIMISER_OPTIONS = ["-a", "-m", "-l"]
     TMP_PTONAME = "opt.pto"
     TMP_OUTPUT = "out.pto"
 
