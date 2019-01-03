@@ -21,12 +21,12 @@ v
 # control points
 
 #hugin_optimizeReferenceImage 0
-#hugin_blender enblend
+#hugin_blender internal
 #hugin_remapper nona
 #hugin_enblendOptions 
 #hugin_enfuseOptions 
 #hugin_hdrmergeOptions 
-#hugin_verdandiOptions --wrap --seam=blend
+#hugin_verdandiOptions --seam=blend
 #hugin_outputLDRBlended true
 #hugin_outputLDRLayers false
 #hugin_outputLDRExposureRemapped false
