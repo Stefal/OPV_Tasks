@@ -5,12 +5,12 @@ m g1 i0 f0 m2 p0.00784314
 
 # image lines
 #-hugin  cropFactor=8.79121
-i w4608 h3456 f3 v125 Ra0 Rb0 Rc0 Rd0 Re0 Eev10.3911146737201 Er1 Eb1 r0 p0 y0 TrX0 TrY0 TrZ0 Tpy0 Tpp0 j0 a0 b0 c0 d0 e0 g0 t0 Va1 Vb0 Vc0 Vd0 Vx0 Vy0  Vm5 n"APN0.JPG"
-#-hugin  cropFactor=10.2564105987549
+i w4608 h3456 f3 v125 Ra0 Rb0 Rc0 Rd0 Re0 Eev10.3911146737201 Er1 Eb1 r0 p0 y0 TrX0 TrY0 TrZ0 Tpy0 Tpp0 j0 a0.0248756 b-0.033 c0.0524907 d0 e0 g0 t0 Va1 Vb0 Vc0 Vd0 Vx0 Vy0  Vm5 n"APN0.JPG"
+#-hugin  cropFactor=8.79121
 i w4608 h3456 f3 v=0 Ra=0 Rb=0 Rc=0 Rd=0 Re=0 Eev12.9209359972717 Er1 Eb1 r0 p0 y90 TrX0 TrY0 TrZ0 Tpy0 Tpp0 j=0 a=0 b=0 c=0 d=0 e=0 g=0 t=0 Va=0 Vb=0 Vc=0 Vd=0 Vx=0 Vy=0  Vm5 n"APN1.JPG"
-#-hugin  cropFactor=8.79120826721191
+#-hugin  cropFactor=8.79121
 i w4608 h3456 f3 v=0 Ra=0 Rb=0 Rc=0 Rd=0 Re=0 Eev11.1719703403314 Er1 Eb1 r0 p0 y180 TrX0 TrY0 TrZ0 Tpy0 Tpp0 j=0 a=0 b=0 c=0 d=0 e=0 g=0 t=0 Va=0 Vb=0 Vc=0 Vd=0 Vx=0 Vy=0  Vm5 n"APN2.JPG"
-#-hugin  cropFactor=8.79120826721191
+#-hugin  cropFactor=8.79121
 i w4608 h3456 f3 v=0 Ra=0 Rb=0 Rc=0 Rd=0 Re=0 Eev11.0208526074793 Er1 Eb1 r0 p0 y-90 TrX0 TrY0 TrZ0 Tpy0 Tpp0 j=0 a=0 b=0 c=0 d=0 e=0 g=0 t=0 Va=0 Vb=0 Vc=0 Vd=0 Vx=0 Vy=0  Vm5 n"APN3.JPG"
 
 
