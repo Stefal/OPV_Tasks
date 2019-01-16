@@ -37,7 +37,7 @@ class PanomodifyTask(Task):
 
     TASK_NAME = "panomodify"
 
-    PANOMODIFY_OPTIONS = ["--straighten", "--rotate=180,0,0", "--fov=360x180"]
+    PANOMODIFY_OPTIONS = ["--straighten", "--fov=360x180"]
     TMP_PTONAME = "opt.pto"
     TMP_OUTPUT = "out.pto"
 
