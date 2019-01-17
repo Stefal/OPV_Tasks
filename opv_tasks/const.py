@@ -26,3 +26,5 @@ class Const():
     CP_SEARCHALGO_VERSION = "0.0.1"
     PANO_FILENAME = "panorama.jpg"
     OPENSFM_RECONSTRUCTION_FOLDER = "/home/opv/data/opensfm_reconstructions/"
+    PIC_PER_LOT = 4        # Pic count for a complete lot (6 for the Rederbro, 4 for the V4MPOD...)
+
