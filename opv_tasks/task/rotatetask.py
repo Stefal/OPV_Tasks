@@ -23,6 +23,7 @@ from path import Path
 from opv_api_client import ressources
 
 from opv_tasks.task import Task, TaskStatusCode, TaskException
+from opv_tasks import Const
 
 
 class RotateTask(Task):
@@ -72,7 +73,7 @@ class RotateTask(Task):
         """Rotate all picture of lot to portrait."""
         if self.lot is not None and self.lot.pictures_path is not None:
             with self._opv_directory_manager.Open(self.lot.pictures_path) as (uuid, dir_path):
-                for apnNo in range(0, 6):
+                for apnNo in range(Const.PIC_PER_LOT):
                     pic_path = Path(dir_path) / "APN{}.JPG".format(apnNo)
                     if os.path.exists(pic_path):
                         self.rotateToPortrait(pic_path)
