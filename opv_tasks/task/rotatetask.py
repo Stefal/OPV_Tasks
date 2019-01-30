@@ -23,7 +23,7 @@ from path import Path
 from opv_api_client import ressources
 
 from opv_tasks.task import Task, TaskStatusCode, TaskException
-from opv_tasks import Const
+from opv_tasks.const import Const
 
 
 class RotateTask(Task):
