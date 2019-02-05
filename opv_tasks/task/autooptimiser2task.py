@@ -37,7 +37,7 @@ class Autooptimiser2Task(Task):
 
     TASK_NAME = "autooptimiser2"
 
-    AUTOOPTIMISER_OPTIONS = ["-n", "-m", "-l" "-s"]
+    AUTOOPTIMISER_OPTIONS = ["-n", "-m", "-l", "-s"]
     PTO_VAR_OPTIONS = ["--opt=y,p,r,v,b"]
     TMP_PTONAME = "opt.pto"
     TMP_OUTPUT = "out.pto"
