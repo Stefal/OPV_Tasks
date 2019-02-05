@@ -14,7 +14,7 @@
 
 # Contributors: Benjamin BERNARD <benjamin.bernard@openpathview.fr>
 # Email: team@openpathview.fr
-# Description: Modify the pano settings.
+# Description: Optimise CP geometrie.
 
 import os
 from path import Path
@@ -26,25 +26,26 @@ from opv_tasks.const import Const
 from opv_tasks.task import Task, TaskException
 
 
-class PanomodifyTask(Task):
+class Autooptimiser2Task(Task):
     """
-    Optimise Panorama with cli pano_modify. Takes CP in input (id_cp and id_malette needed).
+    Optimise CP with cli autooptimiser2. Takes CP in input (id_cp and id_malette needed).
     Input format :
-        opv-task panomodify '{"id_cp": ID_CP, "id_malette": ID_MALETTE }'
+        opv-task autooptimiser2 '{"id_cp": ID_CP, "id_malette": ID_MALETTE }'
     Output format :
         {"id_cp": ID_CP, "id_malette": ID_MALETTE }
     """
 
-    TASK_NAME = "panomodify"
+    TASK_NAME = "autooptimiser2"
 
-    PANOMODIFY_OPTIONS = ["--straighten", "--fov=360x180", "--canvas=13340x6670"]
+    AUTOOPTIMISER_OPTIONS = ["-n", "-m", "-l" "-s"]
+    PTO_VAR_OPTIONS = ["--opt=y,p,r,v,b"]
     TMP_PTONAME = "opt.pto"
     TMP_OUTPUT = "out.pto"
 
     requiredArgsKeys = ["id_cp", "id_malette"]
 
-    def modify(self):
-        """Modify Pano."""
+    def optimise(self):
+        """Optimise CP."""
         with self._opv_directory_manager.Open(self.cp.pto_dir) as (_, pto_dirpath):
             proj_pto = Path(pto_dirpath) / Const.CP_PTO_FILENAME
 
@@ -57,34 +58,40 @@ class PanomodifyTask(Task):
                 self.logger.debug("Copy pto file " + proj_pto + " -> " + local_tmp_pto)
                 copyfile(proj_pto, local_tmp_pto)
 
-                options = list(self.PANOMODIFY_OPTIONS)
+                options = list(self.AUTOOPTIMISER_OPTIONS)
+                options_pto_var = list(self.PTO_VAR_OPTIONS)
+                options_pto_var.append("-o")
+                options_pto_var.append(local_tmp_pto)
+                options_pto_var.append(local_tmp_pto)
                 options.append("-o")
                 options.append(local_tmp_output)  # Add output
                 options.append(local_tmp_pto)  # Add input pto
-                self.logger.debug("Running : " + "panomodify" + " ".join(options))
-                exitCode = self._run_cli("pano_modify", options)
+                self.logger.debug("Running: " + "pto_var" + " ".join(options_pto_var))
+                exitCode = self._run_cli("pto_var", options_pto_var)
+                self.logger.debug("Running: " + "autooptimiser" + " ".join(options))
+                exitCode = self._run_cli("autooptimiser", options)
 
                 if exitCode != 0:
-                    raise PanomodifyException(cli_options=options)
+                    raise AutooptimiserException(cli_options=options)
 
-                #self.cp.optimized = True
-                #import ipdb; ipdb.set_trace()
-                os.rename(local_tmp_output, proj_pto)  # Copy back optimized version
+                self.cp.optimized = True
+
+                os.rename(local_tmp_output, proj_pto)  # Copy back optimized verison
                 os.unlink(local_tmp_pto)
 
     def runWithExceptions(self, options={}):
-        """Run pano modify task."""
+        """Run auto optimiser2 task."""
         self.checkArgs(options)
 
         self.cp = self._client_requestor.make(ressources.Cp, options['id_cp'], options['id_malette'])
 
-        self.modify()
+        self.optimise()
 
         self.cp.save()
 
         return self.cp.id     # Return id_cp and id_malette in a dict
 
-class PanomodifyException(TaskException):
+class Autooptimiser2Exception(TaskException):
     """ Raised when there is an optimisation error"""
 
     def __init__(self, cli_options):
@@ -92,4 +99,4 @@ class PanomodifyException(TaskException):
         self.cli_options = cli_options
 
     def getErrorMessage(self):
-        return "Panomodifiy failed with the following options : " + repr(self.cli_options)
+        return "autooptimiser2 failed with the following options : " + repr(self.cli_options)
