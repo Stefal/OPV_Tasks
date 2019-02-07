@@ -40,7 +40,7 @@ class TilingTask(Task):
 
     TILESIZE = 512
     CUBESIZE = 0
-    QUALITY = 75
+    QUALITY = 92
     PNG = False
 
     def tile(self, pano_path):
