@@ -41,6 +41,7 @@ class CpfindTask(Task):
     TMP_PTONAME = "cp.pto"
     TMP_OUTPUT = "out.pto"
     CPFIND_OPTIONS = [
+        "--prealigned",
         "--sieve1width", "25",
         "--sieve1height", "25",
         "--sieve1size", "625",
