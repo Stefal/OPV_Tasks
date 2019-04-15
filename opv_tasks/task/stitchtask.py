@@ -52,6 +52,7 @@ class StitchTask(Task):
 
             self.logger.debug("Converting and moving pano from tif -> %s" % (panorama_path / Const.PANO_FILENAME))
             self._run_cli("convert", [pano_tif, pano])
+            self._run_cli("exiftool", [" -Tagsfromfile", pano_tif, " -all:all", pano, " -overwrite_original"], stdout_level=logging.DEBUG, stderr_level=logging.DEBUG)
 
             pano_tif.remove()  # remove tif to save place and transfer time
 
